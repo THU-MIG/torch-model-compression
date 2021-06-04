@@ -110,6 +110,7 @@ solver.run()
 ```
 
 ## 使用说明
+常规用法见[examples](examples). 
 详细使用说明见各自文件夹README.md  
-[torchpruner](torchpruner/README.md)  
+[torchpruner](torchpruner/README.md).     
 [torchslim](torchslim/README.md)  
