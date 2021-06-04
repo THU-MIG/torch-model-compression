@@ -5,19 +5,6 @@ pytorch自动化模型压缩工具库是针对于pytorch模型的基于ONNX静�
 工具库包含有两个部分，第一个部分为torchpruner模型分析与修改工具库，通过该工具库可以自动对模型完成模块修改和通道修改等常规操作，而无需关注模型的结构细节。  
 第二个部分为torchslim模型压缩算法库，包含了模型重参数化、剪枝、感知量化训练等多种模型压缩算法，用户仅需给出需要被压缩的模型并定义好用于训练的hook函数，即可以对模型进行自动压缩，并输出被压缩模型产物。  
 
-## 已测试torchpruner可分析的模型
-* AlexNet
-* VGGNet系列
-* ResNet系列
-* MobileNet系列
-* ShuffleNet系列
-* Inception系列
-* MNASNet系列
-* Unet系列
-* FCN
-* DeepLab V3
-* ResNet/Unet QAT感知量化训练模型(QDQ节点)
-
 ## requirement
 * onnx>=1.6  
 * onnxruntime>=1.5  
@@ -44,6 +31,37 @@ examples文件夹主要包含了多种支持的模型的测试列表support_mode
 1）support_model：支持的若干种模型  
 2）torchpruner：使用torchpruner剪枝和模块修改的简单示例  
 3）torchslim：使用torchslim 在分类模型上的简单示例  
+
+## 支持模型结构
+该工具理论上支持所有复杂结构模型的剪枝操作，然而由于精力有限，仅有部分的模型和结构被测试，其他模型和结构不代表不支持，但未测试。
+### 已测试常用模型
+* AlexNet
+* VGGNet系列
+* ResNet系列
+* MobileNet系列
+* ShuffleNet系列
+* Inception系列
+* MNASNet系列
+* Unet系列
+* FCN
+* DeepLab V3
+* ResNet/Unet QAT感知量化训练模型(QDQ节点)
+### 已测试常用结构和操作
+* Conv/Group Conv/TransposeConv/FC
+* Pooling/Upsampling
+* BatchNorm
+* Relu/Sigmoid
+* concat/transpose/view
+* 残差结构/倒置残差结构/Inception结构/Unet结构
+* quantize_per_tensor/dequantize_per_tensor
+
+### 确定暂不支持模型
+* FasterRCNN/MaskRCNN
+
+### 未来重点测试和支持的模型和结构
+* RNN/LSTM/GRU
+* Transformer
+* FasterRCNN
 
 ## torchpruner模型修改
 ```python
