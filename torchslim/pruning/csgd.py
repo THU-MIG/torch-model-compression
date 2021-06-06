@@ -82,12 +82,11 @@ def generate_merge_matrix(cluster_dict, device):
     merge_matrix_dict = {}
     for key in cluster_dict.keys():
         cluster_list, size = cluster_dict[key]
-        merge_matrix = np.ones((size, size))
+        merge_matrix = np.zeros((size, size))
         for cluster in cluster_list:
-            if len(cluster) != 1:
-                for i in cluster:
-                    for j in cluster:
-                        merge_matrix[i][j] = 1 / len(cluster)
+            for i in cluster:
+                for j in cluster:
+                    merge_matrix[i][j] = 1 / len(cluster)
         merge_matrix_dict[key] = torch.Tensor(merge_matrix).cuda(device)
     return merge_matrix_dict
 
@@ -102,13 +101,13 @@ def generate_decay_matrix(
         decay_matrix = np.zeros((size, size))
         if len(obj.size()) == 1:
             strength_gamma = 0.1
+            apply_decay = weight_decay_bias
         else:
             strength_gamma = 1.0
+            apply_decay = weight_decay
         for cluster in cluster_list:
             for i in cluster:
-                decay_matrix[i][i] = (
-                    weight_decay_bias + centri_strength * strength_gamma
-                )
+                decay_matrix[i][i] = apply_decay + centri_strength * strength_gamma
                 for j in cluster:
                     decay_matrix[i][j] -= (
                         centri_strength * strength_gamma / len(cluster)
@@ -397,9 +396,10 @@ class CSGDSolver(slim_solver.CommonSlimSolver):
         model = self.model
         if isinstance(model, nn.DataParallel):
             model = model.module
-        weight_decay = self.variable_dict["apply_weight_decay"]
+        # weight_decay = self.variable_dict["apply_weight_decay"]
         momentum = self.config["momentum"]
         base_lr = self.config["lr"]
+        weight_decay = self.config["weight_decay"]
 
         params = []
         for key, value in model.named_parameters():
