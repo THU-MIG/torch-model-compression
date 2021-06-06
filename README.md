@@ -32,37 +32,6 @@ examples文件夹主要包含了多种支持的模型的测试列表support_mode
 2）torchpruner：使用torchpruner剪枝和模块修改的简单示例  
 3）torchslim：使用torchslim 在分类模型上的简单示例  
 
-## 支持模型结构
-该工具理论上支持所有复杂结构模型的剪枝操作，然而由于精力有限，仅有部分的模型和结构被测试，其他模型和结构不代表不支持，但未测试。
-### 已测试常用模型
-* AlexNet
-* VGGNet系列
-* ResNet系列
-* MobileNet系列
-* ShuffleNet系列
-* Inception系列
-* MNASNet系列
-* Unet系列
-* FCN
-* DeepLab V3
-* ResNet/Unet QAT感知量化训练模型(QDQ节点)
-### 已测试常用结构和操作
-* Conv/Group Conv/TransposeConv/FC
-* Pooling/Upsampling
-* BatchNorm
-* Relu/Sigmoid
-* concat/transpose/view
-* 残差结构/倒置残差结构/Inception结构/Unet结构
-* quantize_per_tensor/dequantize_per_tensor
-
-### 确定暂不支持模型
-* FasterRCNN/MaskRCNN
-
-### 未来重点测试和支持的模型和结构
-* RNN/LSTM/GRU
-* Transformer
-* FasterRCNN
-
 ## torchpruner模型修改
 ```python
 import torch
@@ -115,3 +84,34 @@ solver.run()
 详细使用说明见各自文件夹README.md  
 [torchpruner](torchpruner/README.md)      
 [torchslim](torchslim/README.md)  
+
+## 支持模型结构
+该工具理论上支持所有复杂结构模型的剪枝操作，然而由于精力有限，仅有部分的模型和结构被测试，其他模型和结构不代表不支持，但未测试。
+### 已测试常用模型
+* AlexNet
+* VGGNet系列
+* ResNet系列
+* MobileNet系列
+* ShuffleNet系列
+* Inception系列
+* MNASNet系列
+* Unet系列
+* FCN
+* DeepLab V3
+* ResNet/Unet QAT感知量化训练模型(QDQ节点)
+### 已测试常用结构和操作
+* Conv/Group Conv/TransposeConv/FC
+* Pooling/Upsampling
+* BatchNorm
+* Relu/Sigmoid
+* concat/transpose/view
+* 残差结构/倒置残差结构/Inception结构/Unet结构
+* quantize_per_tensor/dequantize_per_tensor
+
+### 确定暂不支持模型
+* FasterRCNN/MaskRCNN
+
+### 未来重点测试和支持的模型和结构
+* RNN/LSTM/GRU
+* Transformer
+* FasterRCNN
