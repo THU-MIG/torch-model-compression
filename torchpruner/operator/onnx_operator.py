@@ -466,6 +466,12 @@ class onnx_conv(operator.OperatorNode):
         if in_or_out == "out":
             mask = mask.divide_dim(1, (group, -1))
 
+        if in_or_out == "in" and rank == 1 and self.type == "ConvTranspose":
+            dims = list(range(0, len(mask.shape)))
+            dims[1] = 2
+            dims[2] = 1
+            mask = mask.transpose(dims=dims)
+
         operator_dict = None
         group_cut = 0
         # sync the new_mask
@@ -502,6 +508,7 @@ class onnx_conv(operator.OperatorNode):
         for i in range(0, len(masks["out"])):
             if i == 0:
                 masks["out"][0] = masks["out"][0].combine_dim([1, 2])
+        print(masks)
         return mask_list_to_name(self, masks), operator_dict
 
     def flops(self):
