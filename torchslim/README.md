@@ -12,7 +12,7 @@ tensorrt>=7.2 (仅QAT模型导出需要，不进行量化导出可不安装)
 ## 依赖安装
 pip install -r requirements.txt  
 ## 使用文档
-[torchslim使用文档](torchslim/DOCUMENT.md)  
+[torchslim使用文档]DOCUMENT.md)  
 ## 工具使用示例
 示例用法见pytorch-cifar文件夹中的文件  
 [pytorch-cifar](pytorch-cifar/READMD.md)  
