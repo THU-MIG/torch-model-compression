@@ -16,7 +16,7 @@ torchpruner 模型剪枝工具主要包含了三部分：
 python setup.py install  
 
 ## 工具使用文档
-[torchpruner文档](torchpruner/DOCUMENT.md)
+[torchpruner文档](DOCUMENT.md)
 ## 工具使用示例
 使用示例如下：
 ```python
