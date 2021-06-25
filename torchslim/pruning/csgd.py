@@ -57,6 +57,7 @@ def generate_relative_cluser(model, inputs, cluster_dict):
     for key in cluster_dict.keys():
         module = graph.modules[key]
         cluster_list = cluster_dict[key]
+
         analysis_result = module.cut_analysis("weight", index=[0], dim=0)
         analysis_result = analysis_result["terminal"]
         for key in analysis_result.keys():
@@ -159,7 +160,7 @@ def get_linear_conv_names(graph):
     modules = graph.modules
     conv_names = []
     for _, module in modules.items():
-        if isinstance(module.nn_object, (nn.Conv2d, nn.ConvTranspose2d)):
+        if isinstance(module.nn_object, (nn.Conv2d)):
             cut_dict = module.cut_analysis("weight", [0], 0)
             terminal_dict = cut_dict["terminal"]
             key_length = len(terminal_dict.keys())
@@ -173,7 +174,7 @@ def get_all_conv_names(graph):
     modules = graph.modules
     conv_names = []
     for _, module in modules.items():
-        if isinstance(module.nn_object, (nn.Conv2d, nn.ConvTranspose2d)):
+        if isinstance(module.nn_object, (nn.Conv2d)):
             conv_names.append(module.name)
     return conv_names
 
