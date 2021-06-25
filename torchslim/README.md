@@ -15,4 +15,4 @@ pip install -r requirements.txt
 [torchslim使用文档](DOCUMENT.md)  
 ## 工具使用示例
 示例用法见pytorch-cifar文件夹中的文件  
-[pytorch-cifar](/examples/torchslim/pytorch-cifar/READMD.md)  
+[pytorch-cifar](/examples/torchslim/pytorch-cifar/)  
