@@ -45,11 +45,12 @@ def set_cut_tensor(tensor, cut_dims):
             with torch.no_grad():
                 data.set_(data[data_slice])
         else:
-            data = data[data_slice]
+            if isinstance(tensor, nn.Parameter):
+                data.set_(data[data_slice])
+            else:
+                data = data[data_slice]
     data.grad = None
-    if (not data.requires_grad) and isinstance(tensor, nn.Parameter):
-        tensor.data = data
-    return tensor, param_list
+    return data, param_list
 
 
 def recovery_cut_tensor(tensor, cut_dims, param_list):
