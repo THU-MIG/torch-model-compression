@@ -159,6 +159,7 @@ def deploy_model(model, optimizer, inputs, cluster_dict):
 def get_linear_conv_names(graph):
     modules = graph.modules
     conv_names = []
+    all_affected = set()
     for _, module in modules.items():
         if isinstance(module.nn_object, (nn.Conv2d)):
             cut_dict = module.cut_analysis("weight", [0], 0)
@@ -166,9 +167,26 @@ def get_linear_conv_names(graph):
             key_length = len(terminal_dict.keys())
             if key_length > 7:
                 continue
+            temp_affected = set(cut_dict["terminal"].keys())
+            if temp_affected & all_affected:
+                continue
+            all_affected.update(temp_affected)
             conv_names.append(module.name)
     return conv_names
 
+def get_conv_names_without_overlap(graph):
+    modules = graph.modules
+    conv_names = []
+    all_affected = set()
+    for _, module in modules.items():
+        if isinstance(module.nn_object, (nn.Conv2d)):
+            cut_dict = module.cut_analysis("weight", [0], 0)
+            temp_affected = set(cut_dict["terminal"].keys())
+            if temp_affected & all_affected:
+                continue
+            all_affected.update(temp_affected)
+            conv_names.append(module.name)
+    return conv_names
 
 def get_all_conv_names(graph):
     modules = graph.modules
@@ -181,6 +199,7 @@ def get_all_conv_names(graph):
 
 strategy_mapping = {
     "linear_conv": get_linear_conv_names,
+    "all_conv_wo_overlap": get_conv_names_without_overlap,
     "all_conv": get_all_conv_names,
 }
 
