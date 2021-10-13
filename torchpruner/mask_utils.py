@@ -292,6 +292,7 @@ class Mask(object):
                         valid_dim = False
                         break
             if not valid_dim:
+                indexs.append([])
                 continue
             mask_index = sum_mask == 0
             if np.sum(mask_index) == 0:
