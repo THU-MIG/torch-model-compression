@@ -17,7 +17,7 @@ graph = torchpruner.ONNXGraph(model)
 graph.build_graph(inputs=(torch.zeros(1, 3, 224, 224),))
 
 # 遍历所有的Module
-for key in graph.modules:
+for key in list(graph.modules):
     module = graph.modules[key]
     # 如果该module对应了BN层
     if isinstance(module.nn_object, torch.nn.BatchNorm2d):
@@ -28,6 +28,10 @@ for key in graph.modules:
         index = np.argsort(np.abs(weight))[: int(weight.shape[0] * 0.2)]
         result = module.cut_analysis("weight", index=index, dim=0)
         model, context = torchpruner.set_cut(model, result)
+        if context:
+            # graph 存放了各层参数和输出张量的 numpy.ndarray 版本，需要更新
+            graph = torchpruner.ONNXGraph(model)  # 也可以不重新创建 graph
+            graph.build_graph(inputs=(torch.zeros(1, 3, 224, 224),))
 
 # 新的model即为剪枝后的模型
 print(model)
