@@ -176,3 +176,10 @@ def replace_object_by_class(
 ):
     name_list = get_names_by_class(model, object_class, include_super_class)
     return replace_object_by_names(model, name_list, replace_function)
+
+
+def normalize_onnx_parameters(**kwargs):
+    torch_version = torch.__version__.split(".")
+    if torch_version[0] > "2" or len(torch_version) > 1 and torch_version[1] >= "10":
+        kwargs.pop("_retain_param_name", None)
+    return kwargs

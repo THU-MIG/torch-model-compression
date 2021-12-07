@@ -458,9 +458,11 @@ class ONNXGraph(object):
             graph, params_dict, torch_out = torch.onnx.utils._model_to_graph(
                 model,
                 inputs,
-                _retain_param_name=True,
-                do_constant_folding=False,
-                training=training,
+                **normalize_onnx_parameters(
+                    _retain_param_name=True,
+                    do_constant_folding=False,
+                    training=training,
+                )
             )
             torch.onnx.symbolic_helper._set_opset_version(9)
         # create the inputs and the terminals

@@ -305,10 +305,12 @@ def export_onnx(model, inputs, onnx_file):
         model,
         inputs,
         onnx_file,
-        opset_version=10,
-        verbose=False,
-        enable_onnx_checker=False,
-        _retain_param_name=False,
+        **model_tools.normalize_onnx_parameters(
+            opset_version=10,
+            verbose=False,
+            enable_onnx_checker=False,
+            _retain_param_name=True,
+        )
     )
     onnx_model = onnx.load(onnx_file)
     onnx_post_process(onnx_model)

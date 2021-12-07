@@ -42,9 +42,15 @@ torch.onnx.symbolic_helper._set_opset_version(10)
 # # torch.onnx.symbolic_opset10
 # with torch.onnx.select_model_mode_for_export(resnet_prepare, None):
 #     graph = torch.onnx.utils._trace(resnet_prepare,(torch.zeros(1,3,224,224),), OperatorExportTypes.ONNX)
+try:
+    from torchpruner.model_tools import normalize_onnx_parameters
+except ImportError:
+    def normalize_onnx_parameters (**_kwargs):
+        return {}
 
 graph, params_dict, torch_out = torch.onnx.utils._model_to_graph(
-    resnet_prepare, (torch.zeros(1, 3, 224, 224),), _retain_param_name=True
+    resnet_prepare, (torch.zeros(1, 3, 224, 224),),
+    **normalize_onnx_parameters(_retain_param_name=True)
 )
 
 print(graph)
