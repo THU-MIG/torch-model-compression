@@ -117,8 +117,9 @@ checkpoint/
 checkpoints/
 models/
 
-#remove vscode
+#remove project configurations
 .vscode/
+.idea/
 
 #the template test file
 test/

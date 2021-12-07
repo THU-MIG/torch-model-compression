@@ -204,7 +204,7 @@ strategy_mapping = {
 }
 
 
-def get_target_module_names(model, graph_inputs, strategy="linear"):
+def get_target_module_names(model, graph_inputs, strategy):
     # the first step compress the RepModule to the single conv
     model = copy.deepcopy(model)
     # create the graph
@@ -344,7 +344,7 @@ class CSGDSolver(slim_solver.CommonSlimSolver):
         (
             "auto_find_module_strategy",
             str,
-            "linear_bn",
+            "linear_conv",
             False,
             "The strategy to determine the name of module layers to be cut if the prune_module_names is None, \
         support linear and all",

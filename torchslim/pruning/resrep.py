@@ -88,7 +88,7 @@ def RepModule_convert_hook(name, origin_object):
     return origin_object.convert()
 
 
-def get_target_module_names(model, graph_inputs, strategy="linear"):
+def get_target_module_names(model, graph_inputs, strategy):
     # the first step compress the RepModule to the single conv
     model = copy.deepcopy(model)
     module_names = model_tools.get_names_by_class(model, RepModule)

@@ -44,7 +44,7 @@ def generator_params(model, lr, weight_decay, momentum):
     return params
 
 
-device = "cuda:" + args.gpu
+device = "cuda:" + args.gpu if int(args.gpu) >= 0 else "cpu:0"
 best_acc = 0  # best test accuracy
 start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 

@@ -291,7 +291,8 @@ class CommonSlimSolver(SlimSolver):
         # set the device
         if len(self.config["devices"]) == 0:
             raise RuntimeError("The device number must be set")
-        self.variable_dict["base_device"] = "cuda:" + str(self.config["devices"][0])
+        self.variable_dict["base_device"] = "cuda:" + str(self.config["devices"][0]) \
+            if int(self.config["devices"][0]) >= 0 else "cpu:0"
 
         # init the runner
         self.run_hook(self.init_hook)

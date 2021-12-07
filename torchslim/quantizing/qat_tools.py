@@ -8,7 +8,6 @@ import torch.nn.functional as F
 import torch.quantization as q
 import onnx
 from onnx import onnx_pb as onnx_proto
-import tensorrt as trt
 import copy
 
 import torchpruner
@@ -317,6 +316,7 @@ def export_onnx(model, inputs, onnx_file):
 
 
 def export_trt(onnx_file):
+    import tensorrt as trt
     TRT_LOGGER = trt.Logger(trt.Logger.INFO)
     network_flags = 1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
     network_flags = network_flags | (
