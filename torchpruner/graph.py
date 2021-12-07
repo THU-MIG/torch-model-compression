@@ -16,7 +16,6 @@ from typing import Dict, List
 from torchpruner.operator import operator
 from torchpruner.model_tools import *
 
-import time
 import copy
 
 
@@ -625,9 +624,3 @@ class ONNXGraph(object):
         else:
             for operator in operator_dict:
                 operator_dict[operator].fill_shape()
-
-        self.nodes = data_node_dict
-        self.inputs = input_node_dict
-        self.outputs = output_node_dict
-        self.modules = module_dict
-        self.operators = operator_dict

@@ -109,8 +109,8 @@ torchslim.reparameter.acnet.ACNetSolver
     * schduler_generator: scheduler生成函数,形式为(config,optimzer)->scheduler, shcheduler默认每一个epoch调用一次,其中config为sovler的config,optmizer为optimizer_generator生成的优化器, 默认情况下scheduler_generator返回cos_lr_scheduler
 
 ### Resrep剪枝方法
-Resrep剪枝方法是一种带有权重惩罚的剪枝方法,不同于直接在Conv层上对参数添加Lasso Decay, Resrep方法在模型的bn层之后,添加了一个单位矩阵,并对单位矩阵做Lasso Decay惩罚, 然后在训练过程中,逐渐将较小的单位矩阵的列减除,在部署的过程中, 
-额外的单位矩阵,bn层和Conv层可以融合在一起,从而起到实际的提速作用.  
+Resrep剪枝方法是一种带有权重惩罚的剪枝方法，不同于直接在Conv层上对参数添加Lasso Decay，Resrep方法在模型的bn层之后，添加了一个单位矩阵，并对单位矩阵做Lasso Decay惩罚，然后在训练过程中，逐渐将较小的单位矩阵的列减除。
+在部署的过程中，额外的单位矩阵，bn层和Conv层可以融合在一起，从而起到实际的提速作用。
 #### Solver
 torchslim.pruning.resrep.ResRepSolver  
 #### config的参数
@@ -152,7 +152,7 @@ torchslim.pruning.resrep.ResRepSolver
     * schduler_generator: scheduler生成函数,形式为(config,optimzer)->scheduler, shcheduler默认每一个epoch调用一次,其中config为sovler的config,optmizer为optimizer_generator生成的优化器, 默认情况下scheduler_generator返回cos_lr_scheduler
 
 ### CSGD剪枝方法
-Resrep剪枝方法是一种基于通道聚类的剪枝方法，在模型训练之前将每一层的通道聚类，然后在训练过程中添加约束，使得每一层被聚类的通道趋同，经过训练后，最终将趋同的通道合并去除。
+CSGD 剪枝方法是一种基于通道聚类的剪枝方法，在模型训练之前将每一层的通道聚类，然后在训练过程中添加约束，使得每一层被聚类的通道趋同，经过训练后，最终将趋同的通道合并去除。
 #### Solver
 torchslim.pruning.acnet.CSGDSolver
 #### config的参数
