@@ -163,7 +163,7 @@ torchslim.pruning.acnet.CSGDSolver
     * test_batch_size: 测试时每次使用多少数据, 默认为128
     * momentum: 对于有动量设定的优化器的动量值，默认值为0.9
     * weight_decay: 权重惩罚系数，默认值为0.0001
-* ResRep 相关的超参数:
+* CSGD 相关的超参数:
     * prune_epoch: 在哪个epoch执行剪枝操作，将冗余的通道去除，后续的epoch则进行finetune训练
     * centri_strength：聚类约束强度，默认为3e-3
     * cluster_percent：每一层通道数量压缩率，剪枝率大约为1-(1-cluster_percent)^2
