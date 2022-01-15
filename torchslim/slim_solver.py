@@ -87,6 +87,10 @@ class AvgMeter:
         self.avg_dict = {}
 
     def update(self, evalute_dict, count):
+        evalute_dict = {
+            key: cur.item() if isinstance(cur, torch.Tensor) else cur
+            for key, cur in evalute_dict.items()
+        }
         if self.counter == 0:
             self.avg_dict = evalute_dict
             self.counter = count
@@ -335,6 +339,7 @@ class CommonSlimSolver(SlimSolver):
                 self.variable_dict["avg_mentor"].update(
                     evaluate_result, c_sample_number
                 )
+                del evaluate_result, predict
                 if self.variable_dict["iteration"] % self.config["log_interval"] == 0:
                     self.write_log(
                         self.variable_dict["epoch"],
@@ -372,6 +377,7 @@ class CommonSlimSolver(SlimSolver):
                         self.variable_dict["step"],
                         self.variable_dict["test_avg_mentor"].get(),
                     )
+                del evaluate_result, predict
             self.write_log(
                 self.variable_dict["epoch"],
                 "final",
