@@ -220,7 +220,7 @@ def onnx_post_process(onnx_model):
         if node.op_type == "Conv" or node.op_type == "Add":
             children = get_children(onnx_model, node)
             if len(children) != 1:
-                raise RuntimeError("the number of children node must be 1")
+                continue
             if children[0].op_type == "Relu":
                 continue
             if children[0].op_type == "QuantizeLinear":
