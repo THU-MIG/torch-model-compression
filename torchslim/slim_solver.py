@@ -252,6 +252,9 @@ class CommonSlimSolver(SlimSolver):
 
     def write_log(self, epoch, iteration, result_dict):
         content = "| "
+        dt = datetime.now()
+        content += dt.strftime("%H:%M:%S")
+        content += " | "
         content += "epoch:"
         content += str(epoch)
         content += " | "

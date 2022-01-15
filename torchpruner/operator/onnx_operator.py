@@ -508,7 +508,7 @@ class onnx_conv(operator.OperatorNode):
         for i in range(0, len(masks["out"])):
             if i == 0:
                 masks["out"][0] = masks["out"][0].combine_dim([1, 2])
-        print(masks)
+        # print(masks)
         return mask_list_to_name(self, masks), operator_dict
 
     def flops(self):

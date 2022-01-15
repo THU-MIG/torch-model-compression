@@ -269,6 +269,8 @@ def init_hook(self):
     self.variable_dict["target_module_names"] = target_module_names
     self.variable_dict["init_flops"] = current_flops
     self.variable_dict["current_flops"] = current_flops
+    print("The init flops is: %.4f" % (current_flops))
+    print("The target flops is: %.4f" % ((1 - self.config["prune_rate"]) * current_flops))
 
     # set the allow save to be false
     self.variable_dict["allow_save"] = False
@@ -308,7 +310,8 @@ def after_iteration_hook(self):
             print("The cutting bn channel is:")
             for key in bn_channels.keys():
                 print(key + ": " + str(bn_channels[key]))
-            print("The new flops is %.4f" % (current_flops))
+            print("The new flops is %.4f (%.1f%% of %.4f)" % (current_flops,
+                current_flops / init_flops * 100, init_flops))
             self.variable_dict["current_flops"] = current_flops
 
 
