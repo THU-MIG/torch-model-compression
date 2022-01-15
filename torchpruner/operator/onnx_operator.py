@@ -234,7 +234,7 @@ class onnx_Split(operator.OperatorNode):
 # Clip Cos Cosh DequantizeLinear Dropout DynamicQuantizeLinear Elu Erf Exp
 # Floor HardSigmoid Hardmax Identity IsInf IsNaN LeakyRelu Log
 # LogSoftmax Neg NonZero Not Relu Round Selu Shrink Sigmoid Sign Sin
-# Sinh Softmax SoftPlus Softsign Sqrt Tan Tanh ThresholdedRelu
+# Sinh Softmax Softplus Softsign Sqrt Tan Tanh ThresholdedRelu
 # Max Mean Min LpNormalization LRN  MeanVarianceNormalization
 ## the PRelu and the ThreasholdedRelu is special
 #####################################################

@@ -42,7 +42,7 @@ pointwise_ops = [
     "Sin",
     "Sinh",
     "Softmax",
-    "SoftPlus",
+    "Softplus",
     "Softsign",
     "Sqrt",
     "Tan",
