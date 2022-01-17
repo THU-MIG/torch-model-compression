@@ -15,25 +15,29 @@ def merge_conv_bn(conv, bn):
 
     conv_weight = conv.weight
     conv_bias = conv.bias
-
+    # Transpose Condition
+    is_deconv = isinstance(conv, nn.ConvTranspose2d)
     with torch.no_grad():
         factor = bn_weight / torch.sqrt(bn_running_var + eps)
-    with torch.no_grad():
-        conv_weight = conv_weight * factor.view(-1, 1, 1, 1)
-    if conv_bias is None:
-        conv_bias = 0
-    with torch.no_grad():
+        if is_deconv:
+            conv_weight = conv_weight * factor.view(1, -1, 1, 1)
+        else:
+            conv_weight = conv_weight * factor.view(-1, 1, 1, 1)
+        if conv_bias is None:
+            conv_bias = 0
         conv_bias = (conv_bias - bn_running_mean) * factor + bn_bias
 
-    conv_merge = nn.Conv2d(
+    conv_merge = conv.__class__(
         conv.in_channels,
         conv.out_channels,
         conv.kernel_size,
         conv.stride,
         conv.padding,
-        conv.dilation,
-        conv.groups,
+        dilation=conv.dilation,
+        groups=conv.groups,
         bias=True,
+        padding_mode=conv.padding_mode,
+        **({ "output_padding": conv.output_padding } if is_deconv else {}),
     )
     conv_merge.weight = nn.Parameter(conv_weight)
     conv_merge.bias = nn.Parameter(conv_bias)

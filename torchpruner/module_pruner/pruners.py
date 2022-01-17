@@ -115,8 +115,9 @@ class ConvPruner(BasePruner):
         if onnx_name in cut_dict["operator"]:
             ONNX_params = cut_dict["operator"][onnx_name]
             nn_module.groups -= ONNX_params["group"]
-        nn_module.in_channels = nn_module.weight.data.size(1) * nn_module.groups
-        nn_module.out_channels = nn_module.weight.data.size(0)
+        in_dim = 1 if isinstance(nn_module, (nn.Conv1d, nn.Conv2d, nn.Conv3d)) else 0
+        nn_module.in_channels = nn_module.weight.data.size(in_dim) * nn_module.groups
+        nn_module.out_channels = nn_module.weight.data.size(1 - in_dim)
         return nn_module, {**weight_context, **bias_context}
 
     # reconvery the model from the context
@@ -131,8 +132,9 @@ class ConvPruner(BasePruner):
         if onnx_name in cut_dict["operator"]:
             ONNX_params = cut_dict["operator"][onnx_name]
             nn_module.groups += ONNX_params["group"]
-        nn_module.in_channels = nn_module.weight.data.size(1) * nn_module.groups
-        nn_module.out_channels = nn_module.weight.data.size(0)
+        in_dim = 1 if isinstance(nn_module, (nn.Conv1d, nn.Conv2d, nn.Conv3d)) else 0
+        nn_module.in_channels = nn_module.weight.data.size(in_dim) * nn_module.groups
+        nn_module.out_channels = nn_module.weight.data.size(1 - in_dim)
         return nn_module
 
 
