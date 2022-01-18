@@ -14,7 +14,7 @@ import torchpruner
 import torchpruner.model_tools as model_tools
 import torchpruner.function_module as function_module
 
-from torchslim.modules.rep_modules import merge_conv_bn
+from torchslim.modules.acnet_rep_modules import merge_conv_bn
 
 tensorrt_qconfig = q.QConfig(
     activation=q.default_weight_fake_quant, weight=q.default_weight_fake_quant

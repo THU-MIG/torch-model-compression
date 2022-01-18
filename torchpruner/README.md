@@ -2,18 +2,18 @@
 ## 介绍
 torchpruner是一个模型剪枝工具。针对pytorch模型，模型剪枝工具可以自动分析模型的结构，
 以确定当某个模块的某些通道被去除后，模型中的哪些参数需要被去除，以保证剪枝后的模型维度的统一，并对模型进行结构化剪枝。
-torchpruner 模型剪枝工具主要包含了三部分：  
-1） 模型结构分析工具  
-2） 模型剪枝操作工具  
-3） 模型操作工具集  
+torchpruner 模型剪枝工具主要包含了三部分：
+1） 模型结构分析工具
+2） 模型剪枝操作工具
+3） 模型操作工具集
 
 ## requirement
-* onnx>=1.6  
-* onnxruntime>=1.5  
-* pytorch>=1.7  
+* onnx>=1.6
+* onnxruntime>=1.5
+* pytorch>=1.7
 
 ## 安装
-python setup.py install  
+python setup.py install
 
 ## 工具使用文档
 [torchpruner文档](DOCUMENT.md)
@@ -40,5 +40,5 @@ model,context=torchpruner.set_cut(model,result)
 #对卷积模块进行剪枝操作
 
 ```
-简单示例见examples  
+简单示例见examples
 [examples](examples)

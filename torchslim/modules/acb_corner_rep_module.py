@@ -2,7 +2,7 @@ from tokenize import group
 import torch.nn as nn
 import torch.nn.init as init
 import torch
-from .rep_modules import RepModule, return_arg0
+from .base_rep_module import RepModule, return_arg0
 
 
 class ACBCorner(RepModule):

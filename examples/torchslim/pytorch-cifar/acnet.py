@@ -1,6 +1,6 @@
 import torchslim
 import torchslim.pruning
-import torchslim.reparameter.acnet as acnet
+import torchslim.reparameter.reparam as reparam
 
 import torch
 import torch.nn.functional as F
@@ -32,8 +32,8 @@ testset = torchvision.datasets.CIFAR10(
     root="./data", train=False, download=True, transform=transform_test
 )
 
-acnet.ACNetSolver.print_config()
-acnet.ACNetSolver.print_config(help=True)
+reparam.ReparamSolver.print_config()
+reparam.ReparamSolver.print_config(help=True)
 
 
 def predict_function(model, data):
@@ -66,7 +66,8 @@ config["task_name"] = "resnet56_acnet"
 config["lr"] = 0.2
 config["num_workers"] = 2
 config["save_keyword"] = "acc"
-config["acnet_type"] = "acnet_cr"
+config["reparam_type"] = "acnet_cr"
+config["reparam_args"] = { "with_bn": True }
 config["predict_function"] = predict_function
 config["calculate_loss_function"] = calculate_loss
 config["evaluate_function"] = evaluate
@@ -79,5 +80,5 @@ import models
 
 model = models.ResNet56()
 
-solver = acnet.ACNetSolver(model, config)
+solver = reparam.ReparamSolver(model, config)
 solver.run()

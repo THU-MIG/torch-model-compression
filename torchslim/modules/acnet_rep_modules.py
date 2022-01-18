@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 import torch.nn.init as init
 import math
+from .base_rep_module import RepModule, Compactor, return_arg0
 
 # conv bn merge function
 def merge_conv_bn(conv, bn):
@@ -75,26 +76,6 @@ def merge_conv_compactor(conv, compactor):
         conv.bias.data = conv_bias.data
     conv.out_channels = conv.weight.size(0)
     return conv
-
-
-def return_arg0(x):
-    return x
-
-
-class RepModule(nn.Module):
-    def __init__(self):
-        super(RepModule, self).__init__()
-
-    @staticmethod
-    def deploy(name, module=None):
-        module = module if module is not None and isinstance(module, RepModule) else name
-        return module.convert()
-
-    def convert(self):
-        raise NotImplementedError("Lack RepModule::convert")
-
-    def forward(self, *args):
-        raise NotImplementedError("Lack RepModule::forward")
 
 class ACNet_CR(RepModule):
     def __init__(self, conv: nn.Conv2d, deploy=False, with_bn=True):
@@ -184,44 +165,6 @@ class ACNet_CR(RepModule):
             if conv_full.bias is not None:
                 conv_full.bias = nn.Parameter(bias)
             return conv_full
-
-
-class Compactor(nn.Module):
-    def __init__(self, num_features):
-        super(Compactor, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=num_features,
-            out_channels=num_features,
-            kernel_size=1,
-            stride=1,
-            padding=0,
-            bias=False,
-        )
-        identity_mat = np.eye(num_features, dtype=np.float32)
-        self.conv.weight.data.copy_(
-            torch.from_numpy(identity_mat).reshape(num_features, num_features, 1, 1)
-        )
-
-    def forward(self, x):
-        return self.conv(x)
-
-
-class ModuleCompactor(nn.Module):
-    def __init__(self, module):
-        super(ModuleCompactor, self).__init__()
-        self.module = module
-        if isinstance(module, nn.BatchNorm2d):
-            self.compactor = Compactor(self.module.num_features)
-            return
-        if isinstance(module, (nn.Conv2d, nn.ConvTranspose2d)):
-            self.compactor = Compactor(self.module.out_channels)
-            return
-        raise RuntimeError("Unsupport type for compactor " + str(type(self.module)))
-
-    def forward(self, x):
-        x = self.module(x)
-        x = self.compactor(x)
-        return x
 
 
 class weight_norm(nn.Module):

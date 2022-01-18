@@ -9,11 +9,12 @@ import torchslim.slim_solver as slim_solver
 import torchpruner as pruner
 import torchpruner.model_tools as model_tools
 
-from torchslim.modules.rep_modules import ACNet_CR, RepModule, Efficient_ACNet_CR
+from torchslim.modules.base_rep_module import RepModule
+from torchslim.modules.acnet_rep_modules import ACNet_CR, Efficient_ACNet_CR
 from torchslim.modules.cnc_rep_module import CnCRep
-from torchslim.modules.acb_corner_module import ACBCorner
+from torchslim.modules.acb_corner_rep_module import ACBCorner
 
-acnet_class_maping = {
+rep_class_maping = {
     "acnet_cr": ACNet_CR,
     "efficient_acnet_cr": Efficient_ACNet_CR,
     "cnc": CnCRep,
@@ -21,22 +22,21 @@ acnet_class_maping = {
 }
 
 
-def acnet_convertor_generator(acnet_type, acnet_args=None):
-    acnet_class = acnet_class_maping[acnet_type]
-    acnet_args = dict(acnet_args) if acnet_args is not None else {}
+def rep_convertor_generator(rep_type, rep_args=None):
+    rep_class = rep_class_maping[rep_type]
+    rep_args = dict(rep_args) if rep_args is not None else {}
 
-    def acnet_convert_function(name, origin_module):
+    def rep_convert_function(name, origin_module):
         if origin_module.kernel_size[0] == 1 and origin_module.kernel_size[1] == 1:
             return origin_module
-        return acnet_class(origin_module, **acnet_args)
+        return rep_class(origin_module, **rep_args)
 
-    return acnet_convert_function
+    return rep_convert_function
 
 
-# acnet convertor
-def convert_to_acnet(model, acnet_type, acnet_args=None):
+def convert_to_reparam(model, rep_type, rep_args=None):
     model = model_tools.replace_object_by_class(
-        model, nn.Conv2d, acnet_convertor_generator(acnet_type, acnet_args)
+        model, nn.Conv2d, rep_convertor_generator(rep_type, rep_args)
     )
     return model
 
@@ -56,20 +56,28 @@ def scheduler_generator(optimizer, config):
 
 
 def init_hook(self):
-    self.model = convert_to_acnet(self.model, self.config["acnet_type"], self.config.get("acnet_args"))
+    self.model = convert_to_reparam(self.model, self.config["reparam_type"], self.config.get("reparam_args"))
     print(self.model)
 
 
-class ACNetSolver(slim_solver.CommonSlimSolver):
+class ReparamSolver(slim_solver.CommonSlimSolver):
     __config_setting__ = [
         ("task_name", str, "defualt", False, "The task name"),
-        ("acnet_type", str, "acnet_cr", False, "The type of the acnet block"),
+        ("reparam_type", str, "acnet_cr", False, "The type of the reparam block"),
         (
             "save_deploy_format",
             bool,
             True,
             False,
-            "convert the ACNet to conv when saving the model",
+            "convert the RepNet to conv when saving the model",
+        ),
+        ("reparam_args", dict, None, False, "The initialization parameters of the reparam block"),
+        (
+            "save_deploy_format",
+            bool,
+            True,
+            False,
+            "convert the RepNet to conv when saving the model",
         ),
         ("lr", float, 0.1, False, "The learning rate of the optimizer"),
         ("epoch", int, 360, False, "The total epoch to train the model"),
@@ -133,7 +141,7 @@ class ACNetSolver(slim_solver.CommonSlimSolver):
     ]
 
     def __init__(self, model, config):
-        super(ACNetSolver, self).__init__(model, config)
+        super(ReparamSolver, self).__init__(model, config)
         self.regist_init_hook(init_hook)
 
     def generate_params_setting(self):

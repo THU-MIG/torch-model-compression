@@ -6,9 +6,12 @@ import torchpruner as pruner
 import torchpruner.model_tools as model_tools
 import torchslim
 import torchslim.slim_solver as slim_solver
-from torchslim.modules.rep_modules import (
+from torchslim.modules import acb_corner_rep_module, cnc_rep_module
+from torchslim.modules.acnet_rep_modules import (
     merge_conv_bn,
     merge_conv_compactor,
+)
+from torchslim.modules.base_rep_module import (
     Compactor,
     ModuleCompactor,
     RepModule,
@@ -339,7 +342,7 @@ class ResRepSolver(slim_solver.CommonSlimSolver):
             bool,
             True,
             False,
-            "convert the ACNet to conv when saving the model",
+            "convert the RepNet to conv when saving the model",
         ),
         ("lr", float, 0.01, False, "The learning rate of the optimizer"),
         ("epoch", int, 360, False, "The total epoch to train the model"),

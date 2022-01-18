@@ -4,7 +4,7 @@ sys.path.append("../torch-compression")
 
 import torchslim
 import torchslim.pruning
-import torchslim.reparameter.acnet as acnet
+import torchslim.reparameter.reparam as reparam
 
 import torch
 import torch.nn.functional as F
@@ -14,8 +14,8 @@ import torchvision.transforms as transforms
 
 from imagenet_train import *
 
-acnet.ACNetSolver.print_config()
-acnet.ACNetSolver.print_config(help=True)
+reparam.ReparamSolver.print_config()
+reparam.ReparamSolver.print_config(help=True)
 
 
 config = {}
@@ -25,7 +25,7 @@ config["lr"] = 0.1
 config["epoch"] = 90
 config["decay_step"] = [30, 60]
 config["save_keyword"] = "top1"
-config["acnet_type"] = "acnet_cr"
+config["reparam_type"] = "acnet_cr"
 config["predict_function"] = predict_function
 config["calculate_loss_function"] = calculate_loss
 config["evaluate_function"] = evaluate
@@ -40,5 +40,5 @@ import torchvision.models as models
 
 model = models.resnet18(pretrained=False)
 
-solver = acnet.ACNetSolver(model, config)
+solver = reparam.ReparamSolver(model, config)
 solver.run()

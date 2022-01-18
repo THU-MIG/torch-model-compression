@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="torchpruner",
-    version="0.0.1",
+    version="0.1.0",
     description="torchvision",
     author="ZizhouJia",
     url="",

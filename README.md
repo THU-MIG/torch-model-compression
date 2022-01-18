@@ -22,7 +22,7 @@ torchpruner为pytorch模型分析与修改工具库，包含了以下功能：
 2）特定模型结构查找与替换    
 ### torchslim
 torchslim内包含了模型压缩的特定算法：  
-1）ACNet重参数化方法  
+1）ACNet、CnC、ACBCorner等一系列重参数化方法
 2）ResRep模型剪枝方法  
 3）CSGD模型剪枝方法  
 4）QAT量化感知训练，并将pytorch模型导出为tenosrrt模型  

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .rep_modules import RepModule, return_arg0
+from .base_rep_module import RepModule, return_arg0
 
 
 def conv_bn(

@@ -3,7 +3,7 @@
 torchslim是在torchpruner的基础上开发的一系列模型压缩库.   
 给定需要被压缩的模型后, 用户定义一系列的超参数和与训练模型任务相关的函数钩子,然后即可以使用torchslim工具对模型进行模型压缩操作.  
 目前从大类上包含了: 重参数化/剪枝/量化等方法
-其中重参数化方法,支持ACNet重参数化算法.  
+其中重参数化方法,支持ACNet、CnC、ACBCorner等重参数化算法.  
 剪枝支持ResRep剪枝算法.  
 量化支持QAT感知量化训练,并支持onnx导出和tensorrt部署.  
 该库的开发遵循了两项原则:
@@ -75,11 +75,11 @@ solver.run()
 ```
 
 ## 方法介绍
-### ACNet重参数化
-ACNet参数化方法是在训练过程中使用多个分支的卷积结构，在部署的过程中将多个分支的卷积结构合并的方法，从而使得在训练过程中可以有效利用多个卷积核参数量的优势来提升模型精度，
-而在推理的过程中不增加运算开销。  
+### 重参数化（ACNet等）
+ACNet、CnC、ACBCorner等“重参数化方法”，是在训练过程中使用多个分支的卷积结构，在部署的过程中将多个分支的卷积结构合并的方法，
+从而使得在训练过程中可以有效利用多个卷积核参数量的优势来提升模型精度，而在推理的过程中不增加运算开销。  
 #### Solver
-torchslim.reparameter.acnet.ACNetSolver  
+torchslim.reparameter.reparam.ReparamSolver
 #### config的参数
 * 用于训练的超参数:
     * lr: 学习率，默认值为0.1
@@ -88,8 +88,9 @@ torchslim.reparameter.acnet.ACNetSolver
     * test_batch_size: 测试时每次使用多少数据,默认为128
     * momentum: 对于有动量设定的优化器的动量值，默认值为0.9
     * weight_decay: 权重惩罚系数，默认值为0.0001
-* ACNet 相关的超参数:
-    * acnet_type: acnet的类型, 当前可选择`acnet_cr`、`cnc`或`acb_corner`, 默认为`acnet_cr`
+* 相关的超参数:
+    * reparam_type: 重参数化模块的类型, 当前可选择`acnet_cr`、`cnc`或`acb_corner`, 默认为`acnet_cr`
+    * reparam_args: 重参数化模块的配置参数, 词典类型，可以配置`with_bn`等
     * save_deploy_format: 模型在存储时是否合并多分支卷积,默认值为True
 * 系统资源相关的配置
     * task_name: 任务的名称，这项参数决定了数据输入到tensorboardx上的显示名称以及模型的存储路径
@@ -154,7 +155,7 @@ torchslim.pruning.resrep.ResRepSolver
 ### CSGD剪枝方法
 CSGD 剪枝方法是一种基于通道聚类的剪枝方法，在模型训练之前将每一层的通道聚类，然后在训练过程中添加约束，使得每一层被聚类的通道趋同，经过训练后，最终将趋同的通道合并去除。
 #### Solver
-torchslim.pruning.acnet.CSGDSolver
+torchslim.pruning.csgd.CSGDSolver
 #### config的参数
 * 用于训练的超参数:
     * lr: 学习率，默认值为0.1

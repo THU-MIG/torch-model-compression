@@ -6,7 +6,7 @@ import torchpruner as pruner
 import torchpruner.model_tools as model_tools
 import torchslim
 import torchslim.slim_solver as slim_solver
-from torchslim.modules.rep_modules import merge_conv_bn
+from torchslim.modules.acnet_rep_modules import merge_conv_bn
 
 from collections import defaultdict, OrderedDict
 import numpy as np
