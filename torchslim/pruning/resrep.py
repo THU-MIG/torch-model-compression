@@ -84,16 +84,11 @@ strategy_mapping = {
 }
 
 
-def RepModule_convert_hook(name, origin_object):
-    return origin_object.convert()
-
-
 def get_target_module_names(model, graph_inputs, strategy):
     # the first step compress the RepModule to the single conv
     model = copy.deepcopy(model)
-    module_names = model_tools.get_names_by_class(model, RepModule)
     model = model_tools.replace_object_by_names(
-        model, module_names, RepModule_convert_hook
+        model, RepModule, RepModule.deploy
     )
     # create the graph
     graph = pruner.ONNXGraph(model)
@@ -134,7 +129,7 @@ def deploy_convert(model, graph_inputs):
     model = model.cpu()
     # rep module
     model = model_tools.replace_object_by_class(
-        model, RepModule, RepModule_convert_hook
+        model, RepModule, RepModule.deploy
     )
     current_graph = pruner.ONNXGraph(model)
     current_graph.build_graph(graph_inputs)
@@ -226,9 +221,8 @@ def init_hook(self):
 
     # remove the bn layer without conv or with depthwise conv
     model = copy.deepcopy(self.model)
-    module_names = model_tools.get_names_by_class(model, RepModule)
-    model = model_tools.replace_object_by_names(
-        model, module_names, RepModule_convert_hook
+    model = model_tools.replace_object_by_class(
+        model, RepModule, RepModule.deploy
     )
     graph = pruner.ONNXGraph(model)
     graph.build_graph(graph_inputs)
@@ -294,6 +288,7 @@ def after_iteration_hook(self):
             print("reach the target flops no need to prune")
             self.variable_dict["allow_save"] = True
         else:
+            self.variable_dict["allow_save"] = True
             print(">>>>>>>>>>>>>>>>>>>>Pruning the model >>>>>>>>>>>>>>>>>>>>")
             current_graph = pruner.ONNXGraph(self.model)
             current_graph.build_graph(graph_inputs)
@@ -312,7 +307,13 @@ def after_iteration_hook(self):
                 print(key + ": " + str(bn_channels[key]))
             print("The new flops is %.4f (%.1f%% of %.4f)" % (current_flops,
                 current_flops / init_flops * 100, init_flops))
+            global _tick1
             self.variable_dict["current_flops"] = current_flops
+            _tick1 += 1
+            if _tick1 % 6 == 0:
+                from IPython import embed; embed();
+
+_tick1 = 0
 
 
 def optimizer_generator(params, config):

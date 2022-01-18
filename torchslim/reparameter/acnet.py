@@ -10,36 +10,40 @@ import torchpruner as pruner
 import torchpruner.model_tools as model_tools
 
 from torchslim.modules.rep_modules import ACNet_CR, RepModule, Efficient_ACNet_CR
+from torchslim.modules.cnc_rep_module import CnCRep
+from torchslim.modules.acb_corner_module import ACBCorner
 
-acnet_class_maping = {"acnet_cr": ACNet_CR, "efficient_acnet_cr": Efficient_ACNet_CR}
+acnet_class_maping = {
+    "acnet_cr": ACNet_CR,
+    "efficient_acnet_cr": Efficient_ACNet_CR,
+    "cnc": CnCRep,
+    "acb_corner": ACBCorner,
+}
 
 
-def acnet_convertor_generator(acnet_type):
+def acnet_convertor_generator(acnet_type, acnet_args=None):
     acnet_class = acnet_class_maping[acnet_type]
+    acnet_args = dict(acnet_args) if acnet_args is not None else {}
 
     def acnet_convert_function(name, origin_module):
         if origin_module.kernel_size[0] == 1 and origin_module.kernel_size[1] == 1:
             return origin_module
-        return acnet_class(origin_module)
+        return acnet_class(origin_module, **acnet_args)
 
     return acnet_convert_function
 
 
-def deploy_convert_function(name, origin_module):
-    return origin_module.convert()
-
-
 # acnet convertor
-def convert_to_acnet(model, acnet_type):
+def convert_to_acnet(model, acnet_type, acnet_args=None):
     model = model_tools.replace_object_by_class(
-        model, nn.Conv2d, acnet_convertor_generator(acnet_type)
+        model, nn.Conv2d, acnet_convertor_generator(acnet_type, acnet_args)
     )
     return model
 
 
 def deploy_convert(model):
     return model_tools.replace_object_by_class(
-        model, RepModule, deploy_convert_function
+        model, RepModule, RepModule.deploy
     )
 
 
@@ -52,7 +56,7 @@ def scheduler_generator(optimizer, config):
 
 
 def init_hook(self):
-    self.model = convert_to_acnet(self.model, self.config["acnet_type"])
+    self.model = convert_to_acnet(self.model, self.config["acnet_type"], self.config.get("acnet_args"))
     print(self.model)
 
 

@@ -7,6 +7,8 @@ import math
 
 # conv bn merge function
 def merge_conv_bn(conv, bn):
+    if bn is None:
+        return conv
     bn_weight = bn.weight
     bn_bias = bn.bias
     bn_running_mean = bn.running_mean
@@ -57,7 +59,7 @@ def merge_conv_compactor(conv, compactor):
         conv_weight = torch.sum(
             conv_weight.unsqueeze(0) * compactor_weight.unsqueeze(2), dim=1
         )
-        if conv_bias != None:
+        if conv_bias is not None:
             conv_bias = torch.matmul(
                 compactor_weight.view(
                     compactor_weight.size(0), compactor_weight.size(1)
@@ -69,25 +71,38 @@ def merge_conv_compactor(conv, compactor):
         conv_weight = conv_weight.transpose(1, 0)
 
     conv.weight.data = conv_weight.data
-    if conv.bias != None:
+    if conv.bias is not None:
         conv.bias.data = conv_bias.data
-    else:
-        conv.bias = None
     conv.out_channels = conv.weight.size(0)
     return conv
+
+
+def return_arg0(x):
+    return x
 
 
 class RepModule(nn.Module):
     def __init__(self):
         super(RepModule, self).__init__()
 
+    @staticmethod
+    def deploy(name, module=None):
+        module = module if module is not None and isinstance(module, RepModule) else name
+        return module.convert()
+
+    def convert(self):
+        raise NotImplementedError("Lack RepModule::convert")
+
+    def forward(self, *args):
+        raise NotImplementedError("Lack RepModule::forward")
 
 class ACNet_CR(RepModule):
-    def __init__(self, conv: nn.Conv2d):
+    def __init__(self, conv: nn.Conv2d, deploy=False, with_bn=True):
         super(ACNet_CR, self).__init__()
-        self.conv = None
-        if conv.kernel_size == 1:
-            self.conv = nn.Conv2d(
+        self.with_bn = with_bn
+        self.fused_conv = None
+        if deploy or conv.kernel_size == 1:
+            self.fused_conv = nn.Conv2d(
                 conv.in_channels,
                 conv.out_channels,
                 conv.kernel_size,
@@ -95,9 +110,11 @@ class ACNet_CR(RepModule):
                 conv.padding,
                 conv.dilation,
                 conv.groups,
-                conv.bias,
+                conv.bias is not None,
+                conv.padding_mode,
             )
         else:
+            use_bias_in_conv = conv.bias is not None and not with_bn
             self.conv_full = nn.Conv2d(
                 conv.in_channels,
                 conv.out_channels,
@@ -106,9 +123,10 @@ class ACNet_CR(RepModule):
                 conv.padding,
                 conv.dilation,
                 conv.groups,
-                False,
+                use_bias_in_conv,
+                conv.padding_mode,
             )
-            self.bn_full = nn.BatchNorm2d(conv.out_channels)
+            self.bn_full = nn.BatchNorm2d(conv.out_channels) if with_bn else return_arg0
             self.conv_row = nn.Conv2d(
                 conv.in_channels,
                 conv.out_channels,
@@ -117,9 +135,10 @@ class ACNet_CR(RepModule):
                 (0, conv.padding[1]),
                 conv.dilation,
                 conv.groups,
-                False,
+                use_bias_in_conv,
+                conv.padding_mode,
             )
-            self.bn_row = nn.BatchNorm2d(conv.out_channels)
+            self.bn_row = nn.BatchNorm2d(conv.out_channels) if with_bn else return_arg0
             self.conv_col = nn.Conv2d(
                 conv.in_channels,
                 conv.out_channels,
@@ -128,16 +147,18 @@ class ACNet_CR(RepModule):
                 (conv.padding[0], 0),
                 conv.dilation,
                 conv.groups,
-                False,
+                use_bias_in_conv,
+                conv.padding_mode,
             )
-            self.bn_col = nn.BatchNorm2d(conv.out_channels)
+            self.bn_col = nn.BatchNorm2d(conv.out_channels) if with_bn else return_arg0
+        if with_bn and self.fused_conv is None:
             torch.nn.init.constant_(self.bn_full.weight, 0.33)
             torch.nn.init.constant_(self.bn_row.weight, 0.33)
             torch.nn.init.constant_(self.bn_col.weight, 0.33)
 
     def forward(self, x):
-        if self.conv is not None:
-            return self.conv(x)
+        if self.fused_conv is not None:
+            return self.fused_conv(x)
         else:
             filter_full = self.bn_full(self.conv_full(x))
             filter_col = self.bn_col(self.conv_col(x))
@@ -145,20 +166,23 @@ class ACNet_CR(RepModule):
             return filter_full + filter_col + filter_row
 
     def convert(self):
-        if self.conv is not None:
-            return self.conv
+        if self.fused_conv is not None:
+            return self.fused_conv
         else:
-            conv_col = merge_conv_bn(self.conv_col, self.bn_col)
-            conv_row = merge_conv_bn(self.conv_row, self.bn_row)
-            conv_full = merge_conv_bn(self.conv_full, self.bn_full)
+            conv_col = merge_conv_bn(self.conv_col, self.bn_col if self.with_bn else None)
+            conv_row = merge_conv_bn(self.conv_row, self.bn_row if self.with_bn else None)
+            conv_full = merge_conv_bn(self.conv_full, self.bn_full if self.with_bn else None)
+            bias = None
             with torch.no_grad():
-                bias = conv_col.bias + conv_row.bias + conv_full.bias
+                if conv_full.bias is not None:
+                    bias = conv_col.bias + conv_row.bias + conv_full.bias
             with torch.no_grad():
                 weight = conv_full.weight
                 weight[:, :, weight.size(2) // 2, :] += conv_row.weight[:, :, 0, :]
                 weight[:, :, :, weight.size(3) // 2] += conv_col.weight[:, :, :, 0]
             conv_full.weight = nn.Parameter(weight)
-            conv_full.bias = nn.Parameter(bias)
+            if conv_full.bias is not None:
+                conv_full.bias = nn.Parameter(bias)
             return conv_full
 
 
@@ -212,12 +236,13 @@ class weight_norm(nn.Module):
 
 
 class Efficient_ACNet_CR(RepModule):
-    def __init__(self, conv: nn.Conv2d):
+    def __init__(self, conv: nn.Conv2d, deploy=False, with_bn=True):
         super(Efficient_ACNet_CR, self).__init__()
-        self.conv = None
+        self.fused_conv = None
         init_value = 0.1
-        if conv.kernel_size == 1:
-            self.conv = nn.Conv2d(
+        assert with_bn == True
+        if deploy or conv.kernel_size == 1:
+            self.fused_conv = nn.Conv2d(
                 conv.in_channels,
                 conv.out_channels,
                 conv.kernel_size,
@@ -226,11 +251,13 @@ class Efficient_ACNet_CR(RepModule):
                 conv.dilation,
                 conv.groups,
                 conv.bias,
+                conv.padding_mode,
             )
         else:
             self.stride = conv.stride
             self.padding = conv.padding
             self.groups = conv.groups
+            self.dilation = conv.dilation
             self.kernel_full = nn.Parameter(
                 torch.randn(
                     (
@@ -279,8 +306,8 @@ class Efficient_ACNet_CR(RepModule):
         pass
 
     def forward(self, x):
-        if self.conv is not None:
-            return self.conv(x)
+        if self.fused_conv is not None:
+            return self.fused_conv(x)
         kernel = self.weight_norm_full(self.kernel_full)
         kernel[
             :, :, :, kernel.size(3) // 2 : (kernel.size(3) + 1) // 2
@@ -290,6 +317,9 @@ class Efficient_ACNet_CR(RepModule):
         ] += self.weight_norm_col(self.kernel_col)
         # kernel[:,:,kernel.size(2)//2:(kernel.size(2)+1)//2,kernel.size(3)//2:(kernel.size(3)+1)//2]+=self.weight_norm_single(self.kernel_single)
         result = F.conv2d(
-            x, kernel, self.bias, self.stride, self.padding, groups=self.groups
+            x, kernel, self.bias, self.stride, self.padding, self.dilation, self.groups
         )
         return result
+
+    def convert(self):
+        pass

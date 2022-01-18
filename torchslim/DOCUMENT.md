@@ -89,7 +89,7 @@ torchslim.reparameter.acnet.ACNetSolver
     * momentum: 对于有动量设定的优化器的动量值，默认值为0.9
     * weight_decay: 权重惩罚系数，默认值为0.0001
 * ACNet 相关的超参数:
-    * acnet_type: acnet的类型,当前仅可选择acnet_cr,默认为acnet_cr
+    * acnet_type: acnet的类型, 当前可选择`acnet_cr`、`cnc`或`acb_corner`, 默认为`acnet_cr`
     * save_deploy_format: 模型在存储时是否合并多分支卷积,默认值为True
 * 系统资源相关的配置
     * task_name: 任务的名称，这项参数决定了数据输入到tensorboardx上的显示名称以及模型的存储路径
