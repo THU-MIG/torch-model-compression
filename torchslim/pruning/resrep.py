@@ -90,7 +90,7 @@ strategy_mapping = {
 def get_target_module_names(model, graph_inputs, strategy):
     # the first step compress the RepModule to the single conv
     model = copy.deepcopy(model)
-    model = model_tools.replace_object_by_names(
+    model = model_tools.replace_object_by_class(
         model, RepModule, RepModule.deploy
     )
     # create the graph

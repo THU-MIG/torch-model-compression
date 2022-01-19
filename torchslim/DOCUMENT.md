@@ -129,7 +129,7 @@ torchslim.pruning.resrep.ResRepSolver
     * lasso_decay: lasso_decay惩罚项,默认为0.0001
     * prune_rate: 模型的剪枝率, 默认为0.5
     * prune_groups: 每次剪枝减除的组数,默认为1
-    * groups_size: 每组在单个compactor减除的channel数,默认为8
+    * group_size: 每组在单个compactor减除的channel数,默认为8
     * min_channels: 保留的最少channels数,默认为8
  * 与模型结构相关的参数:
     * input_shapes: 模型的输入的size组成的list,一个二维的list,第一维代表了有多少个输入,第二维代表了输入的size,如果其为None,input_shapes将默认为dataset返回的samples的第一个张量的size,注意size不包含batch维度. 默认值为None
