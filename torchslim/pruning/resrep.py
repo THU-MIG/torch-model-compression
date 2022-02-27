@@ -310,13 +310,7 @@ def after_iteration_hook(self):
                 print(key + ": " + str(bn_channels[key]))
             print("The new flops is %.4f (%.1f%% of %.4f)" % (current_flops,
                 current_flops / init_flops * 100, init_flops))
-            global _tick1
             self.variable_dict["current_flops"] = current_flops
-            _tick1 += 1
-            if _tick1 % 6 == 0:
-                from IPython import embed; embed();
-
-_tick1 = 0
 
 
 def optimizer_generator(params, config):
