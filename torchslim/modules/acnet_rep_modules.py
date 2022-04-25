@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.nn.intrinsic.qat as nniqat
 import numpy as np
 import torch.nn.init as init
 import math
@@ -30,7 +31,17 @@ def merge_conv_bn(conv, bn):
             conv_bias = 0
         conv_bias = (conv_bias - bn_running_mean) * factor + bn_bias
 
-    conv_merge = conv.__class__(
+    float_class = conv.__class__
+    qat_classes = (nniqat.ConvBn1d, nniqat.ConvBn2d, nniqat.ConvBn3d)
+    if isinstance(conv, qat_classes):
+        while float_class is not None and float_class not in qat_classes:
+            float_class = getattr(float_class, "__base__", None)
+        if float_class is not None:
+            float_class = float_class.__bases__[1]
+    if float_class is None:
+        float_class = nn.ConvTranspose2d if is_deconv else nn.Conv2d
+
+    conv_merge = float_class(
         conv.in_channels,
         conv.out_channels,
         conv.kernel_size,
