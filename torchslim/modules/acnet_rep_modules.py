@@ -68,14 +68,16 @@ def merge_conv_compactor(conv, compactor):
         conv_weight = conv_weight.transpose(1, 0)
 
     with torch.no_grad():
-        conv_weight = torch.sum(
-            conv_weight.unsqueeze(0) * compactor_weight.unsqueeze(2), dim=1
+        reshaped_compactor_weight = compactor_weight.reshape(
+            compactor_weight.size(0), compactor_weight.size(1)
         )
+        conv_weight = torch.matmul(
+            reshaped_compactor_weight,
+            conv_weight.reshape(conv_weight.shape[0], -1),
+        ).reshape((compactor_weight.size(0), *conv_weight.shape[1:]))
         if conv_bias is not None:
             conv_bias = torch.matmul(
-                compactor_weight.view(
-                    compactor_weight.size(0), compactor_weight.size(1)
-                ),
+                reshaped_compactor_weight,
                 conv_bias.unsqueeze(1),
             ).view(-1)
     # Transpose Condition
