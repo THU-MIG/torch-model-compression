@@ -616,9 +616,20 @@ class ONNXGraph(object):
         self.operators = operator_dict
         # fille the data and value
         if fill_value:
+            visited: Set[operator_module.OperatorNode] = set()
+            to_check_tensors: Set[DataNode] = set()
             for operator in operator_dict.values():
                 operator.fill_shape()
                 operator.fill_value()
+                visited.add(operator)
+                for to_check in tuple(to_check_tensors):
+                    if not (set(i for i in to_check.out_operators) - visited):
+                        to_check_tensors.remove(to_check)
+                        to_check.data = None
+                to_check_tensors.update(operator.out_data)
+            for to_check in to_check_tensors:
+                to_check.data = None
         else:
             for operator in operator_dict.values():
                 operator.fill_shape()
+        import gc; gc.collect()

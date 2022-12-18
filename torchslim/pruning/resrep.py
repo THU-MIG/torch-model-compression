@@ -96,7 +96,9 @@ def get_target_module_names(model, graph_inputs, strategy):
     # create the graph
     graph = pruner.ONNXGraph(model)
     graph.build_graph(graph_inputs)
-    return strategy_mapping[strategy](graph)
+    names = strategy_mapping[strategy](graph)
+    del graph; import gc; gc.collect()
+    return names
 
 
 def module_compactor_replace_function(name, origin_object):
@@ -137,18 +139,19 @@ def deploy_convert(model, graph_inputs):
     current_graph = pruner.ONNXGraph(model)
     current_graph.build_graph(graph_inputs)
     # conv and compactor
-    name_groups = pruner.model_tools.get_name_groups_by_classes(
+    c_name_groups = pruner.model_tools.get_name_groups_by_classes(
         current_graph, [(nn.Conv2d, nn.ConvTranspose2d), Compactor]
     )
-    model = model_tools.replace_object_by_name_groups(
-        model, name_groups, merge_conv_compactor_hook
-    )
     # conv bn and compactor
-    name_groups = pruner.model_tools.get_name_groups_by_classes(
+    cb_name_groups = pruner.model_tools.get_name_groups_by_classes(
         current_graph, [(nn.Conv2d, nn.ConvTranspose2d), nn.BatchNorm2d, Compactor]
     )
+    del current_graph; import gc; gc.collect()
     model = model_tools.replace_object_by_name_groups(
-        model, name_groups, merge_conv_bn_compactor_hook
+        model, c_name_groups, merge_conv_compactor_hook
+    )
+    model = model_tools.replace_object_by_name_groups(
+        model, cb_name_groups, merge_conv_bn_compactor_hook
     )
     return model
 
@@ -199,7 +202,9 @@ def flops(model, graph_inputs):
     model = deploy_convert(model, graph_inputs)
     graph = pruner.ONNXGraph(model)
     graph.build_graph(graph_inputs)
-    return graph.flops()
+    flops = graph.flops()
+    del graph; import gc; gc.collect()
+    return flops
 
 
 # the init hook
@@ -232,6 +237,7 @@ def init_hook(self):
     name_groups = model_tools.get_name_groups_by_classes(
         graph, [(nn.Conv2d, nn.ConvTranspose2d), nn.BatchNorm2d]
     )
+    del graph; import gc; gc.collect()
     filtered_module_names = []
     for conv_name, bn_name in name_groups:
         if (
@@ -303,6 +309,7 @@ def after_iteration_hook(self):
                 self.config["group_size"],
                 self.config["min_channels"],
             )
+            del current_graph; import gc; gc.collect()
             current_flops = flops(self.model, graph_inputs)
             bn_channels = get_bn_channels(self.model, target_module_names)
             print("The cutting bn channel is:")
