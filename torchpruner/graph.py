@@ -11,9 +11,9 @@ from . import register
 from . import mask_utils
 from . import function_module
 
-from typing import Dict, List
+from typing import Dict, List, Set
 
-from torchpruner.operator import operator
+from torchpruner.operator import operator as operator_module
 from torchpruner.model_tools import *
 
 import copy
@@ -173,8 +173,8 @@ class DataNode(object):
         self._is_input = False
         self._is_output = False
         # operator related
-        self.in_operator: operator.OperatorNode = None
-        self.out_operators: List[operator.OperatorNode] = []
+        self.in_operator: operator_module.OperatorNode = None
+        self.out_operators: List[operator_module.OperatorNode] = []
         # data add with the hook
         self.data = None
         # add a key value changeable
@@ -314,9 +314,7 @@ class Module(object):
         self.sub_modules: Dict[str, Module] = OrderedDict()  # store the sub modules
         self.in_data: List[DataNode] = []  # the data may be used different times
         self.out_data: List[DataNode] = []  # the data may produced different times
-        self.operators: List[
-            operator.OperatorNode
-        ] = []  # save the opeartor in current module
+        self.operators: List[operator_module.OperatorNode] = []  # save the opeartor in current module
         self.nn_object: nn.Module = None  # bounding the actual object
         self.terminal_node: DataNode = None
 
@@ -368,7 +366,7 @@ class ONNXGraph(object):
         self.inputs: Dict[str, DataNode] = OrderedDict()
         self.nodes: Dict[str, DataNode] = OrderedDict()
         self.outputs: Dict[str, DataNode] = OrderedDict()
-        self.operators: Dict[str, operator.OperatorNode] = OrderedDict()
+        self.operators: Dict[str, operator_module.OperatorNode] = OrderedDict()
         self._device: str = onnx_device
 
     def __str__(self):
@@ -432,7 +430,7 @@ class ONNXGraph(object):
         # output node dict
         output_node_dict: Dict[str, DataNode] = OrderedDict()
         # operator list
-        operator_dict: Dict[str, DataNode] = OrderedDict()
+        operator_dict: Dict[str, operator_module.OperatorNode] = OrderedDict()
         # module dict
         module_dict: Dict[str, Module] = OrderedDict()
 
@@ -618,9 +616,9 @@ class ONNXGraph(object):
         self.operators = operator_dict
         # fille the data and value
         if fill_value:
-            for operator in operator_dict:
-                operator_dict[operator].fill_shape()
-                operator_dict[operator].fill_value()
+            for operator in operator_dict.values():
+                operator.fill_shape()
+                operator.fill_value()
         else:
-            for operator in operator_dict:
-                operator_dict[operator].fill_shape()
+            for operator in operator_dict.values():
+                operator.fill_shape()

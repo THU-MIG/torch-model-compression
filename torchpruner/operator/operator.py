@@ -1,3 +1,5 @@
+from typing import List
+
 import onnxruntime.backend
 import onnx
 import onnxruntime
@@ -73,8 +75,8 @@ class OperatorNode(object):
             else:
                 self.params[attlist[i]] = node[attlist[i]]
         # the operator node will be filled at the build graph
-        self.in_data: g.DataNode = []
-        self.out_data: g.DataNode = []
+        self.in_data: List[g.DataNode] = []
+        self.out_data: List[g.DataNode] = []
 
     def set_device(self, device):
         self.device = device.upper()
