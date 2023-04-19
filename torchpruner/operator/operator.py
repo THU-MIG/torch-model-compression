@@ -55,7 +55,6 @@ class OperatorNode(object):
         import torchpruner.graph as g
 
         # define the OperatorNode data structure
-        outputs = list(node.outputs())
         self.name = None
         op_kind = node.kind().split("::")
         self.type = op_kind[1]

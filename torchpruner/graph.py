@@ -491,6 +491,9 @@ class ONNXGraph(object):
             operator_node.set_device(self._device)
             # create the outputs node
             outputs = list(node.outputs())
+            max_out_num = getattr(operator_node, "MAX_OUT_NUM", 0)
+            if max_out_num > 0:
+                outputs = outputs[:max_out_num]
             for out_node in outputs:
                 data_node = DataNode(out_node)
                 data_node.in_operator = operator_node
@@ -506,7 +509,6 @@ class ONNXGraph(object):
             operator_dict[str(i)] = operator_node
 
         # if the data node is the output, set the changeable to be false, set the is output to be true
-        outputs = list(node.outputs())
         for out_node in outputs:
             out_node_name = "self." + out_node.debugName().split("::")[-1]
             data_node = data_node_dict[out_node_name]

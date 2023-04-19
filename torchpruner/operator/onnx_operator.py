@@ -1080,6 +1080,7 @@ class onnx_BatchNormalization(onnx_mapping):
                 ]
             },
         }
+        self.MAX_OUT_NUM = 1
 
     def flops(self):
         shape = self.in_data[0].size()
