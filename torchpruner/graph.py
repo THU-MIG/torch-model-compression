@@ -160,7 +160,7 @@ class scope_name_workaround(object):
 class DataNode(object):
     def __init__(self, node):
         # basic info
-        self.name = "self." + node.debugName()
+        self.name = "self." + node.debugName().split("::")[-1]
         self._type = None
         self._size = None
         self.kind = str(node.type().kind())
@@ -499,7 +499,7 @@ class ONNXGraph(object):
             # link the inputs node
             inputs = list(node.inputs())
             for in_node in inputs:
-                in_node_name = "self." + in_node.debugName()
+                in_node_name = "self." + in_node.debugName().split("::")[-1]
                 data_node = data_node_dict[in_node_name]
                 operator_node.in_data.append(data_node)
                 data_node.out_operators.append(operator_node)
@@ -508,7 +508,7 @@ class ONNXGraph(object):
         # if the data node is the output, set the changeable to be false, set the is output to be true
         outputs = list(node.outputs())
         for out_node in outputs:
-            out_node_name = "self." + out_node.debugName()
+            out_node_name = "self." + out_node.debugName().split("::")[-1]
             data_node = data_node_dict[out_node_name]
             data_node._changeable = False
             data_node._is_output = True
